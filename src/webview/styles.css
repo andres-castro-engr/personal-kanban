@@ -131,12 +131,13 @@ button.icon-btn:hover {
 }
 
 .cards-container {
-  padding: 0 12px 12px 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  overflow-y: auto;
-  flex-grow: 1;
+  gap: 8px;
+  padding: 8px 4px;
+  /* Altura mínima garantizada para facilitar el drop en columnas vacías */
+  min-height: 80px; 
+  transition: background-color 0.2s ease, outline 0.2s ease;
 }
 
 /* --- TARJETA --- */
@@ -326,4 +327,53 @@ input[type="date"] {
   padding: 8px 12px;
   border-radius: 6px;
   font-size: 13px;
+}
+
+/* --- ESTILOS PARA DRAG & DROP --- */
+.card[draggable="true"] {
+  cursor: grab;
+}
+
+.card[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Estado de la tarjeta mientras se arrastra */
+.card.dragging {
+  opacity: 0.4;
+  border: 2px dashed #3b82f6;
+}
+
+.cards-container:empty::before {
+  content: 'Arrastra una tarjeta aquí';
+  display: block;
+  text-align: center;
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground, #888);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 16px 8px;
+  pointer-events: none;
+}
+
+/* Estado de la columna receptora mientras se pasa una tarjeta sobre ella */
+.cards-container.drag-over {
+  background-color: rgba(59, 130, 246, 0.15);
+  border-radius: 6px;
+  outline: 2px dashed #3b82f6;
+}
+
+/* --- ESTILOS DRAG & DROP COLUMNAS --- */
+.column.js-column[draggable="true"] {
+  cursor: grab;
+}
+
+.column.column-dragging {
+  opacity: 0.4;
+  outline: 2px dashed #3b82f6;
+}
+
+.column.col-drag-over {
+  border-left: 4px solid #3b82f6;
+  background-color: rgba(59, 130, 246, 0.08);
 }

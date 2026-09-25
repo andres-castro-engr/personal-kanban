@@ -8,6 +8,8 @@ let deletingColIdx = null;
 let deletingCardInfo = null;
 let assigningCardTagsInfo = null; 
 let selectedTagIds = new Set();
+let draggedCardInfo = null;
+let draggedColIdx = null;
 
 window.addEventListener('message', (event) => {
   const message = event.data;
@@ -84,7 +86,9 @@ function render() {
 
   (currentBoard.columns || []).forEach((col, colIdx) => {
     const colEl = document.createElement('div');
-    colEl.className = 'column';
+    colEl.className = 'column js-column';
+    colEl.draggable = true;
+    colEl.dataset.col = colIdx;
 
     if (col.color) {
       colEl.style.backgroundColor = col.color;
@@ -104,7 +108,7 @@ function render() {
           <button class="icon-btn js-delete-col" data-col="${colIdx}" title="Eliminar columna">🗑️</button>
         </div>
       </div>
-      <div class="cards-container">
+      <div class="cards-container js-cards-container" data-col="${colIdx}">
         ${(col.cards || []).map((card, cardIdx) => renderCard(card, colIdx, cardIdx)).join('')}
       </div>
       <button class="add-card-btn js-add-card" data-col="${colIdx}">+ Añadir una tarjeta</button>
@@ -125,42 +129,31 @@ function renderCard(card, colIdx, cardIdx) {
   const cardStyle = card.color ? `background-color: ${card.color};` : '';
 
   return `
-    <div class="card" style="${cardStyle}">
+    <!-- Agregar draggable="true" y dataset de identificadores -->
+    <div class="card js-card" draggable="true" data-col="${colIdx}" data-card="${cardIdx}" style="${cardStyle}">
       <div class="card-tags">${tagsHtml}</div>
       <div class="card-header">
-        <!-- Agregamos la clase js-card-title para capturar el clic/doble clic y un boton de edicion opcional -->
         <div class="card-title js-card-title" data-col="${colIdx}" data-card="${cardIdx}" title="Doble clic para editar texto">
           ${escapeHtml(card.title)}
         </div>
-        <!--
-		<div style="display: flex; gap: 4px;">
-          <button class="icon-btn js-edit-card-title" data-col="${colIdx}" data-card="${cardIdx}" title="Editar texto">✏️</button>
-          <button class="icon-btn js-delete-card" data-col="${colIdx}" data-card="${cardIdx}" title="Eliminar tarjeta">🗑️</button>
-        </div>
-		-->
       </div>
       
       <div class="card-footer">
-	  	<!--
-        <div>
-          ${card.dueDate ? `<span class="due-date-badge">📅 ${card.dueDate}</span>` : ''}
-        </div>
-		-->
-        <div class="card-controls">
-		<input type="date" class="js-card-duedate" data-col="${colIdx}" data-card="${cardIdx}" value="${card.dueDate || ''}" title="Fecha límite">
+     <div class="card-controls">   
+	  	  <input type="date" class="js-card-duedate" data-col="${colIdx}" data-card="${cardIdx}" value="${card.dueDate || ''}" title="Fecha límite">  
 		  <button class="icon-btn js-edit-card-title" data-col="${colIdx}" data-card="${cardIdx}" title="Editar texto">✏️</button>
-          <label class="color-picker-wrapper" title="Cambiar color de tarjeta">
+          <button class="icon-btn js-edit-tags" data-col="${colIdx}" data-card="${cardIdx}" title="Gestionar etiquetas">🏷️</button>
+		  <label class="color-picker-wrapper" title="Cambiar color de tarjeta">
             🎨
             <input type="color" class="js-card-color" data-col="${colIdx}" data-card="${cardIdx}" value="${card.color || '#ffffff'}">
           </label>
-          <button class="icon-btn js-edit-tags" data-col="${colIdx}" data-card="${cardIdx}" title="Gestionar etiquetas">🏷️</button>
-		  <button class="icon-btn js-delete-card" data-col="${colIdx}" data-card="${cardIdx}" title="Eliminar tarjeta">🗑️</button>
+          <button class="icon-btn js-delete-card" data-col="${colIdx}" data-card="${cardIdx}" title="Eliminar tarjeta">🗑️</button>
+
         </div>
       </div>
     </div>
   `;
 }
-
 function renderTagsList() {
   const list = document.getElementById('tagsList');
   list.innerHTML = (currentBoard.tags || [])
@@ -635,3 +628,154 @@ function renderCardTagsSelectionList(filterText) {
     })
     .join('');
 }
+
+// 1. Inicio del arrastre (dragstart)
+document.addEventListener('dragstart', (e) => {
+  // Evitar arrastrar la columna si el usuario intenta seleccionar texto o interactuar con un botón
+  if (e.target.closest('input, button, label')) {
+    e.preventDefault();
+    return;
+  }
+
+  // A) Arrastre de TARJETA
+  const cardEl = e.target.closest('.js-card');
+  if (cardEl) {
+    draggedCardInfo = {
+      sourceColIdx: parseInt(cardEl.dataset.col, 10),
+      sourceCardIdx: parseInt(cardEl.dataset.card, 10)
+    };
+    cardEl.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.stopPropagation(); // Evitar que la columna padre capture el drag
+    return;
+  }
+
+  // B) Arrastre de COLUMNA
+  const colEl = e.target.closest('.js-column');
+  if (colEl) {
+    draggedColIdx = parseInt(colEl.dataset.col, 10);
+    colEl.classList.add('column-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  }
+});
+
+// 2. Fin del arrastre (dragend)
+document.addEventListener('dragend', (e) => {
+  // Limpiar estados de tarjeta
+  const cardEl = e.target.closest('.js-card');
+  if (cardEl) {
+    cardEl.classList.remove('dragging');
+  }
+
+  // Limpiar estados de columna
+  const colEl = e.target.closest('.js-column');
+  if (colEl) {
+    colEl.classList.remove('column-dragging');
+  }
+
+  // Limpiar clases CSS visuales
+  document.querySelectorAll('.js-cards-container').forEach((c) => c.classList.remove('drag-over'));
+  document.querySelectorAll('.js-column').forEach((col) => col.classList.remove('col-drag-over'));
+
+  draggedCardInfo = null;
+  draggedColIdx = null;
+});
+
+// 3. Permitir soltar sobre áreas válidas (dragover)
+document.addEventListener('dragover', (e) => {
+  // A) Si estamos arrastrando una TARJETA
+  if (draggedCardInfo) {
+    const container = e.target.closest('.js-cards-container');
+    if (!container) return;
+
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    container.classList.add('drag-over');
+    return;
+  }
+
+  // B) Si estamos arrastrando una COLUMNA
+  if (draggedColIdx !== null) {
+    const colEl = e.target.closest('.js-column');
+    if (!colEl) return;
+
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    colEl.classList.add('col-drag-over');
+  }
+});
+
+// 4. Salir de la zona de soltar (dragleave)
+document.addEventListener('dragleave', (e) => {
+  if (draggedCardInfo) {
+    const container = e.target.closest('.js-cards-container');
+    if (container && !container.contains(e.relatedTarget)) {
+      container.classList.remove('drag-over');
+    }
+  }
+
+  if (draggedColIdx !== null) {
+    const colEl = e.target.closest('.js-column');
+    if (colEl && !colEl.contains(e.relatedTarget)) {
+      colEl.classList.remove('col-drag-over');
+    }
+  }
+});
+
+// 5. Soltar en el destino (drop)
+document.addEventListener('drop', (e) => {
+  e.preventDefault();
+
+  // A) DROP DE TARJETA
+  if (draggedCardInfo) {
+    const container = e.target.closest('.js-cards-container');
+    if (!container) return;
+
+    container.classList.remove('drag-over');
+    const targetColIdx = parseInt(container.dataset.col, 10);
+    const { sourceColIdx, sourceCardIdx } = draggedCardInfo;
+
+    const sourceColumn = currentBoard.columns[sourceColIdx];
+    const [movedCard] = sourceColumn.cards.splice(sourceCardIdx, 1);
+
+    const targetCards = Array.from(container.querySelectorAll('.js-card:not(.dragging)'));
+    let inserted = false;
+
+    for (let i = 0; i < targetCards.length; i++) {
+      const cardRect = targetCards[i].getBoundingClientRect();
+      const cardMidY = cardRect.top + cardRect.height / 2;
+
+      if (e.clientY < cardMidY) {
+        currentBoard.columns[targetColIdx].cards.splice(i, 0, movedCard);
+        inserted = true;
+        break;
+      }
+    }
+
+    if (!inserted) {
+      currentBoard.columns[targetColIdx].cards.push(movedCard);
+    }
+
+    save();
+    render();
+    return;
+  }
+
+  // B) DROP DE COLUMNA
+  if (draggedColIdx !== null) {
+    const targetColEl = e.target.closest('.js-column');
+    if (!targetColEl) return;
+
+    targetColEl.classList.remove('col-drag-over');
+    const targetColIdx = parseInt(targetColEl.dataset.col, 10);
+
+    if (draggedColIdx === targetColIdx) return; // Se soltó en el mismo lugar
+
+    // Reordenar las columnas en el arreglo
+    const [movedCol] = currentBoard.columns.splice(draggedColIdx, 1);
+    currentBoard.columns.splice(targetColIdx, 0, movedCol);
+
+    save();
+    render();
+  }
+});

@@ -101,16 +101,15 @@ button.icon-btn:hover {
 
 /* --- COLUMNA (ESTILO TRELLO) --- */
 .column {
-  background: var(--column-bg);
-  color: var(--column-header-text);
-  border-radius: var(--border-radius);
-  width: 300px;
-  min-width: 300px;
-  max-width: 300px;
   display: flex;
   flex-direction: column;
-  max-height: 100%;
-  box-shadow: var(--shadow-md);
+  max-height: 100%; /* No sobrepasar el alto visible del tablero */
+  background: var(--vscode-sideBar-background, #1e1e1e);
+  border-radius: 8px;
+  width: 280px;
+  min-width: 280px;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
 .column-header {
@@ -131,13 +130,15 @@ button.icon-btn:hover {
 }
 
 .cards-container {
-  display: flex;
+display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 8px 4px;
-  /* Altura mínima garantizada para facilitar el drop en columnas vacías */
-  min-height: 80px; 
-  transition: background-color 0.2s ease, outline 0.2s ease;
+  min-height: 80px;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 /* --- TARJETA --- */
@@ -224,6 +225,8 @@ button.icon-btn:hover {
   border-bottom-left-radius: var(--border-radius);
   border-bottom-right-radius: var(--border-radius);
   font-weight: 600;
+  margin-top: 8px;
+  flex-shrink: 0;
 }
 
 .add-card-btn:hover {
@@ -342,6 +345,19 @@ input[type="date"] {
 .card.dragging {
   opacity: 0.4;
   border: 2px dashed #3b82f6;
+}
+
+.cards-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cards-container::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.cards-container::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .cards-container:empty::before {

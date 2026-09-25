@@ -1,6 +1,8 @@
 {
   "name": "personal-kanban",
   "displayName": "Personal Kanban",
+  "publisher": "andres-castro-engr",
+  "icon": "assets/icon.png",
   "description": "A kanban board using markdown files.",
   "version": "0.0.1",
   "engines": {

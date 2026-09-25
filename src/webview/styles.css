@@ -24,7 +24,7 @@ body {
   color: #f8fafc;
 }
 
-/* --- BARRA DE HERRAMIENTAS --- */
+/* --- TOOLBAR --- */
 .toolbar {
   display: flex;
   gap: 12px;
@@ -45,7 +45,7 @@ body {
   color: #cbd5e1;
 }
 
-/* --- BOTONES GENERALES --- */
+/* --- GENERAL BUTTONS --- */
 button {
   background: #3b82f6;
   color: #ffffff;
@@ -68,7 +68,7 @@ button:hover {
 
 button.secondary {
   background: rgba(255, 255, 255, 0.1);
-  color: #f1f5f9;
+  color: #a1a3a5;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
@@ -89,7 +89,7 @@ button.icon-btn:hover {
   color: #ef4444;
 }
 
-/* --- CONTENEDOR DEL TABLERO --- */
+/* --- BOARD CONTAINER --- */
 .board {
   display: flex;
   gap: 20px;
@@ -99,11 +99,11 @@ button.icon-btn:hover {
   padding-bottom: 12px;
 }
 
-/* --- COLUMNA (ESTILO TRELLO) --- */
+/* --- COLUMN (TRELLO-LIKE) --- */
 .column {
   display: flex;
   flex-direction: column;
-  max-height: 100%; /* No sobrepasar el alto visible del tablero */
+  max-height: 100%; /* Do not exceed the visible board height */
   background: var(--vscode-sideBar-background, #1e1e1e);
   border-radius: 8px;
   width: 280px;
@@ -141,7 +141,7 @@ display: flex;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
-/* --- TARJETA --- */
+/* --- CARD --- */
 .card {
   background: var(--card-bg);
   color: var(--card-text);
@@ -174,7 +174,7 @@ display: flex;
   color: #0f172a;
 }
 
-/* --- ETIQUETAS Y FECHAS --- */
+/* --- TAGS AND DATES --- */
 .card-tags {
   display: flex;
   flex-wrap: wrap;
@@ -234,7 +234,7 @@ display: flex;
   color: #0f172a;
 }
 
-/* --- CONTENEDOR E ÍCONO DE COLOR PICKER --- */
+/* --- COLOR PICKER CONTAINER AND ICON --- */
 .color-picker-wrapper {
   position: relative;
   display: inline-flex;
@@ -251,7 +251,7 @@ display: flex;
   background: rgba(0, 0, 0, 0.15);
 }
 
-/* Ocultar el input nativo de color sobre el ícono pero mantenerlo cliqueable */
+/* Hide native color input over the icon but keep it clickable */
 .color-picker-wrapper input[type="color"] {
   position: absolute;
   top: 0;
@@ -264,7 +264,7 @@ display: flex;
   padding: 0;
 }
 
-/* --- INPUTS DE COLOR Y FECHA PERSONALIZADOS --- */
+/* --- CUSTOM COLOR AND DATE INPUTS --- */
 input[type="color"] {
   -webkit-appearance: none;
   border: none;
@@ -293,7 +293,7 @@ input[type="date"] {
   color: #475569;
 }
 
-/* --- MODAL DE ETIQUETAS --- */
+/* --- TAGS MODAL --- */
 .modal {
   display: none;
   position: fixed;
@@ -332,7 +332,7 @@ input[type="date"] {
   font-size: 13px;
 }
 
-/* --- ESTILOS PARA DRAG & DROP --- */
+/* --- DRAG & DROP STYLES --- */
 .card[draggable="true"] {
   cursor: grab;
 }
@@ -341,7 +341,7 @@ input[type="date"] {
   cursor: grabbing;
 }
 
-/* Estado de la tarjeta mientras se arrastra */
+/* Card state while dragging */
 .card.dragging {
   opacity: 0.4;
   border: 2px dashed #3b82f6;
@@ -361,7 +361,7 @@ input[type="date"] {
 }
 
 .cards-container:empty::before {
-  content: 'Arrastra una tarjeta aquí';
+  content: 'Drag a card here';
   display: block;
   text-align: center;
   font-size: 12px;
@@ -372,14 +372,14 @@ input[type="date"] {
   pointer-events: none;
 }
 
-/* Estado de la columna receptora mientras se pasa una tarjeta sobre ella */
+/* Recipient column state while a card is dragged over */
 .cards-container.drag-over {
   background-color: rgba(59, 130, 246, 0.15);
   border-radius: 6px;
   outline: 2px dashed #3b82f6;
 }
 
-/* --- ESTILOS DRAG & DROP COLUMNAS --- */
+/* --- DRAG & DROP COLUMNS STYLES --- */
 .column.js-column[draggable="true"] {
   cursor: grab;
 }

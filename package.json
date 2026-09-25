@@ -15,7 +15,7 @@
     "customEditors": [
       {
         "viewType": "kanbanViewer.option",
-        "displayName": "Tablero Kanban",
+        "displayName": "Personal Kanban",
         "selector": [
           {
             "filenamePattern": "*.kanban.md"

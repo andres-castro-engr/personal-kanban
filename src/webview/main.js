@@ -1,5 +1,7 @@
 const vscode = acquireVsCodeApi();
 let currentBoard = { tags: [], columns: [], boardColor: '#0f172a' };
+let editingColInfo = null;
+let editingTagIdx = null;
 
 window.addEventListener('message', (event) => {
   const message = event.data;
@@ -8,6 +10,22 @@ window.addEventListener('message', (event) => {
     render();
   }
 });
+
+function editColumnTitle(colIdx) {
+  const col = currentBoard.columns[colIdx];
+  editingColInfo = { colIdx };
+  
+  const input = document.getElementById('editColTitleInput');
+  input.value = col.title;
+  
+  document.getElementById('editColModal').classList.add('active');
+  input.focus();
+}
+
+function closeEditColModal() {
+  document.getElementById('editColModal').classList.remove('active');
+  editingColInfo = null;
+}
 
 function save() {
   vscode.postMessage({ type: 'SAVE_BOARD', data: currentBoard });
@@ -34,13 +52,16 @@ function render() {
 
     colEl.innerHTML = `
       <div class="column-header">
-        <span>${escapeHtml(col.title)}</span>
+        <span class="js-col-title" data-col="${colIdx}" style="cursor: pointer;" title="Doble clic para editar nombre">
+          ${escapeHtml(col.title)}
+        </span>
         <div class="column-header-actions">
+          <button class="icon-btn js-edit-col-title" data-col="${colIdx}" title="Editar nombre de columna">✏️</button>
           <label class="color-picker-wrapper" title="Cambiar color de columna">
             🎨
             <input type="color" class="js-column-color" data-col="${colIdx}" value="${col.color || '#f1f5f9'}">
           </label>
-          <button class="icon-btn js-delete-col" data-col="${colIdx}" title="Eliminar columna">✕</button>
+          <button class="icon-btn js-delete-col" data-col="${colIdx}" title="Eliminar columna">🗑️</button>
         </div>
       </div>
       <div class="cards-container">
@@ -67,21 +88,33 @@ function renderCard(card, colIdx, cardIdx) {
     <div class="card" style="${cardStyle}">
       <div class="card-tags">${tagsHtml}</div>
       <div class="card-header">
-        <div class="card-title">${escapeHtml(card.title)}</div>
-        <button class="icon-btn js-delete-card" data-col="${colIdx}" data-card="${cardIdx}" title="Eliminar tarjeta">✕</button>
+        <!-- Agregamos la clase js-card-title para capturar el clic/doble clic y un boton de edicion opcional -->
+        <div class="card-title js-card-title" data-col="${colIdx}" data-card="${cardIdx}" title="Doble clic para editar texto">
+          ${escapeHtml(card.title)}
+        </div>
+        <!--
+		<div style="display: flex; gap: 4px;">
+          <button class="icon-btn js-edit-card-title" data-col="${colIdx}" data-card="${cardIdx}" title="Editar texto">✏️</button>
+          <button class="icon-btn js-delete-card" data-col="${colIdx}" data-card="${cardIdx}" title="Eliminar tarjeta">🗑️</button>
+        </div>
+		-->
       </div>
       
       <div class="card-footer">
+	  	<!--
         <div>
           ${card.dueDate ? `<span class="due-date-badge">📅 ${card.dueDate}</span>` : ''}
         </div>
+		-->
         <div class="card-controls">
+		<input type="date" class="js-card-duedate" data-col="${colIdx}" data-card="${cardIdx}" value="${card.dueDate || ''}" title="Fecha límite">
+		  <button class="icon-btn js-edit-card-title" data-col="${colIdx}" data-card="${cardIdx}" title="Editar texto">✏️</button>
           <label class="color-picker-wrapper" title="Cambiar color de tarjeta">
             🎨
             <input type="color" class="js-card-color" data-col="${colIdx}" data-card="${cardIdx}" value="${card.color || '#ffffff'}">
           </label>
           <button class="icon-btn js-edit-tags" data-col="${colIdx}" data-card="${cardIdx}" title="Gestionar etiquetas">🏷️</button>
-          <input type="date" class="js-card-duedate" data-col="${colIdx}" data-card="${cardIdx}" value="${card.dueDate || ''}" title="Fecha límite">
+		  <button class="icon-btn js-delete-card" data-col="${colIdx}" data-card="${cardIdx}" title="Eliminar tarjeta">🗑️</button>
         </div>
       </div>
     </div>
@@ -93,19 +126,40 @@ function renderTagsList() {
   list.innerHTML = (currentBoard.tags || [])
     .map(
       (t, idx) => `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding: 4px; border-radius: 6px; background: rgba(0,0,0,0.03);">
       <span class="tag-badge" style="background:${t.color}">${escapeHtml(t.name)}</span>
       <div style="display:flex; align-items:center; gap:6px;">
+        <button class="icon-btn js-edit-tag" data-tag="${idx}" title="Editar etiqueta">✏️</button>
         <label class="color-picker-wrapper" title="Cambiar color de etiqueta">
           🎨
           <input type="color" class="js-tag-color" data-tag="${idx}" value="${t.color || '#89b4fa'}">
         </label>
-        <button class="icon-btn js-delete-tag" data-tag="${idx}">✕</button>
+        <button class="icon-btn js-delete-tag" data-tag="${idx}" title="Eliminar etiqueta">🗑️</button>
       </div>
     </div>
   `
     )
     .join('');
+}
+
+function startEditTag(idx) {
+  const tag = currentBoard.tags[idx];
+  editingTagIdx = idx;
+
+  document.getElementById('tagModalTitle').innerText = 'Editar Etiqueta';
+  document.getElementById('newTagName').value = tag.name;
+  document.getElementById('newTagColor').value = tag.color;
+  document.getElementById('btnCreateTag').innerText = 'Guardar Cambios';
+  document.getElementById('btnCancelEditTag').style.display = 'inline-block';
+}
+
+function resetTagForm() {
+  editingTagIdx = null;
+  document.getElementById('tagModalTitle').innerText = 'Crear Etiqueta';
+  document.getElementById('newTagName').value = '';
+  document.getElementById('newTagColor').value = '#89b4fa';
+  document.getElementById('btnCreateTag').innerText = 'Agregar Etiqueta';
+  document.getElementById('btnCancelEditTag').style.display = 'none';
 }
 
 // --- DELEGACIÓN DE EVENTOS EN LÍNEA PARA CUMPLIR CON CSP ---
@@ -146,60 +200,165 @@ document.addEventListener('change', (e) => {
 
 // Eventos 'click' para Botones generales y Modal
 document.addEventListener('click', (e) => {
-  const target = e.target.closest('button');
-  if (!target) return;
+  const targetBtn = e.target.closest('button');
+  if (!targetBtn) return;
 
-  if (target.id === 'btnAddColumn') {
+  // Acciones del Modal de Edición de Columna
+  if (targetBtn.id === 'btnSaveEditCol') {
+    const newTitle = document.getElementById('editColTitleInput').value.trim();
+    if (newTitle && editingColInfo !== null) {
+      const { colIdx } = editingColInfo;
+      currentBoard.columns[colIdx].title = newTitle;
+      save();
+      render();
+    }
+    closeEditColModal();
+    return;
+  }
+
+  if (targetBtn.id === 'btnCancelEditCol') {
+    closeEditColModal();
+    return;
+  }
+
+  //  Acciones del Modal de Edición de Tarjeta
+  if (targetBtn.id === 'btnSaveEditCard') {
+    const newTitle = document.getElementById('editCardTitleInput').value.trim();
+    if (newTitle && editingCardInfo) {
+      const { colIdx, cardIdx } = editingCardInfo;
+      currentBoard.columns[colIdx].cards[cardIdx].title = newTitle;
+      save();
+      render();
+    }
+    closeEditCardModal();
+    return;
+  }
+
+  if (targetBtn.id === 'btnCancelEditCard') {
+    closeEditCardModal();
+    return;
+  }
+
+  // Botón para editar título de columna ✏️
+  if (targetBtn.classList.contains('js-edit-col-title')) {
+    const colIdx = parseInt(targetBtn.dataset.col, 10);
+    editColumnTitle(colIdx);
+    return;
+  }
+
+  //  Acciones principales de la Toolbar
+  if (targetBtn.id === 'btnAddColumn') {
     const title = prompt('Nombre de la columna:');
     if (!title) return;
     currentBoard.columns.push({ id: 'col-' + Date.now(), title, cards: [] });
     save();
     render();
-  } else if (target.id === 'btnOpenTagModal') {
-    document.getElementById('tagModal').classList.add('active');
+    return;
+  }
+
+  if (targetBtn.id === 'btnOpenTagModal') {
+    resetTagForm();
+	document.getElementById('tagModal').classList.add('active');
     renderTagsList();
-  } else if (target.id === 'btnCloseTagModal') {
+    return;
+  }
+
+  if (targetBtn.id === 'btnCloseTagModal') {
     document.getElementById('tagModal').classList.remove('active');
-  } else if (target.id === 'btnCreateTag') {
-    const name = document.getElementById('newTagName').value;
+	resetTagForm();
+    return;
+  }
+
+  if (targetBtn.id === 'btnCreateTag') {
+    const name = document.getElementById('newTagName').value.trim();
     const color = document.getElementById('newTagColor').value;
     if (!name) return;
+
     if (!currentBoard.tags) currentBoard.tags = [];
-    currentBoard.tags.push({ id: 'tag-' + Date.now(), name, color });
-    document.getElementById('newTagName').value = '';
+
+    if (editingTagIdx !== null) {
+      // Guardar cambios de etiqueta existente
+      currentBoard.tags[editingTagIdx].name = name;
+      currentBoard.tags[editingTagIdx].color = color;
+    } else {
+      // Crear nueva etiqueta
+      currentBoard.tags.push({ id: 'tag-' + Date.now(), name, color });
+    }
+
+    resetTagForm();
     save();
     renderTagsList();
     render();
-  } else if (target.classList.contains('js-delete-col')) {
-    const colIdx = parseInt(target.dataset.col, 10);
+    return;
+  }
+
+  // Cancelar edición de etiqueta
+  if (targetBtn.id === 'btnCancelEditTag') {
+    resetTagForm();
+    return;
+  }
+
+  // Botón de editar etiqueta ✏️ en la lista
+  if (targetBtn.classList.contains('js-edit-tag')) {
+    const tagIdx = parseInt(targetBtn.dataset.tag, 10);
+    startEditTag(tagIdx);
+    return;
+  }
+
+  // 3. Acciones de Tarjetas y Columnas (mediante clases dinámicas)
+  if (targetBtn.classList.contains('js-edit-card-title')) {
+    const colIdx = parseInt(targetBtn.dataset.col, 10);
+    const cardIdx = parseInt(targetBtn.dataset.card, 10);
+    editCardTitle(colIdx, cardIdx);
+  } else if (targetBtn.classList.contains('js-delete-col')) {
+    const colIdx = parseInt(targetBtn.dataset.col, 10);
     if (confirm('¿Eliminar esta columna y sus tarjetas?')) {
       currentBoard.columns.splice(colIdx, 1);
       save();
       render();
     }
-  } else if (target.classList.contains('js-add-card')) {
-    const colIdx = parseInt(target.dataset.col, 10);
+  } else if (targetBtn.classList.contains('js-add-card')) {
+    const colIdx = parseInt(targetBtn.dataset.col, 10);
     const title = prompt('Título de la tarjeta:');
     if (!title) return;
     currentBoard.columns[colIdx].cards.push({ id: 'card-' + Date.now(), title, tags: [] });
     save();
     render();
-  } else if (target.classList.contains('js-delete-card')) {
-    const colIdx = parseInt(target.dataset.col, 10);
-    const cardIdx = parseInt(target.dataset.card, 10);
+  } else if (targetBtn.classList.contains('js-delete-card')) {
+    const colIdx = parseInt(targetBtn.dataset.col, 10);
+    const cardIdx = parseInt(targetBtn.dataset.card, 10);
     currentBoard.columns[colIdx].cards.splice(cardIdx, 1);
     save();
     render();
-  } else if (target.classList.contains('js-delete-tag')) {
-    const tagIdx = parseInt(target.dataset.tag, 10);
+  } else if (targetBtn.classList.contains('js-delete-tag')) {
+    const tagIdx = parseInt(targetBtn.dataset.tag, 10);
     currentBoard.tags.splice(tagIdx, 1);
     save();
     renderTagsList();
     render();
-  } else if (target.classList.contains('js-edit-tags')) {
-    const colIdx = parseInt(target.dataset.col, 10);
-    const cardIdx = parseInt(target.dataset.card, 10);
+  } else if (targetBtn.classList.contains('js-edit-tags')) {
+    const colIdx = parseInt(targetBtn.dataset.col, 10);
+    const cardIdx = parseInt(targetBtn.dataset.card, 10);
     editCardTags(colIdx, cardIdx);
+  }
+});
+
+// Capturar doble clic directamente en el título de la tarjeta
+document.addEventListener('dblclick', (e) => {
+  // Doble clic en el título de una columna
+  const targetColTitle = e.target.closest('.js-col-title');
+  if (targetColTitle) {
+    const colIdx = parseInt(targetColTitle.dataset.col, 10);
+    editColumnTitle(colIdx);
+    return;
+  }
+
+  // Doble clic en el título de una tarjeta
+  const targetCardTitle = e.target.closest('.js-card-title');
+  if (targetCardTitle) {
+    const colIdx = parseInt(targetCardTitle.dataset.col, 10);
+    const cardIdx = parseInt(targetCardTitle.dataset.card, 10);
+    editCardTitle(colIdx, cardIdx);
   }
 });
 
@@ -227,4 +386,22 @@ function escapeHtml(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+let editingCardInfo = null; // Guardará { colIdx, cardIdx }
+
+function editCardTitle(colIdx, cardIdx) {
+  const card = currentBoard.columns[colIdx].cards[cardIdx];
+  editingCardInfo = { colIdx, cardIdx };
+  
+  const input = document.getElementById('editCardTitleInput');
+  input.value = card.title;
+  
+  document.getElementById('editCardModal').classList.add('active');
+  input.focus();
+}
+
+function closeEditCardModal() {
+  document.getElementById('editCardModal').classList.remove('active');
+  editingCardInfo = null;
 }

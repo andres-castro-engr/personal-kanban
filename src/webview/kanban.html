@@ -28,11 +28,44 @@
     <div class="modal-content">
       <h3>Etiquetas del Tablero</h3>
       <div id="tagsList"></div>
-      <h4>Crear Etiqueta</h4>
+      
+      <h4 id="tagModalTitle">Crear Etiqueta</h4>
       <input type="text" id="newTagName" placeholder="Nombre de etiqueta">
-      <input type="color" id="newTagColor" value="#89b4fa">
-      <button id="btnCreateTag">Agregar Etiqueta</button>
-      <button id="btnCloseTagModal" class="secondary">Cerrar</button>
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+        <label class="color-picker-wrapper" title="Color de etiqueta">
+          🎨
+          <input type="color" id="newTagColor" value="#89b4fa">
+        </label>
+        <button id="btnCreateTag">Agregar Etiqueta</button>
+        <button id="btnCancelEditTag" class="secondary" style="display: none;">Cancelar</button>
+      </div>
+      <div style="margin-top: 12px; text-align: right;">
+        <button id="btnCloseTagModal" class="secondary">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Editar Tarjeta -->
+<div id="editCardModal" class="modal">
+  <div class="modal-content">
+    <h3>Editar Tarjeta</h3>
+    <input type="text" id="editCardTitleInput" placeholder="Título de la tarjeta">
+    <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px;">
+      <button id="btnCancelEditCard" class="secondary">Cancelar</button>
+      <button id="btnSaveEditCard">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Editar Título de Columna -->
+  <div id="editColModal" class="modal">
+    <div class="modal-content">
+      <h3>Editar Nombre de la Columna</h3>
+      <input type="text" id="editColTitleInput" placeholder="Nombre de la columna">
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px;">
+        <button id="btnCancelEditCol" class="secondary">Cancelar</button>
+        <button id="btnSaveEditCol">Guardar</button>
+      </div>
     </div>
   </div>
 

@@ -16,7 +16,13 @@ export class KanbanEditorProvider implements vscode.CustomTextEditorProvider {
     webviewPanel: vscode.WebviewPanel,
     _token: vscode.CancellationToken
   ): Promise<void> {
-    webviewPanel.webview.options = { enableScripts: true };
+    
+    webviewPanel.webview.options = {
+      enableScripts: true,
+      localResourceRoots: [
+        vscode.Uri.joinPath(this.context.extensionUri, 'out')
+      ]
+    };
 
     // Asignar el HTML de la vista
     webviewPanel.webview.html = getHtmlForWebview(webviewPanel.webview, this.context.extensionUri);
@@ -46,13 +52,6 @@ export class KanbanEditorProvider implements vscode.CustomTextEditorProvider {
     webviewPanel.onDidDispose(() => {
       changeDocumentSubscription.dispose();
     });
-
-    webviewPanel.webview.options = {
-      enableScripts: true,
-      localResourceRoots: [
-        vscode.Uri.joinPath(this.context.extensionUri, 'out')
-      ]
-    };
 
     updateWebview();
   }

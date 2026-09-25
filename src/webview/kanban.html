@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tablero Kanban</title>
+  <link rel="stylesheet" href="${stylesUri}">
+</head>
+<body>
+
+  <div class="toolbar">
+    <button id="btnAddColumn">+ Nueva Columna</button>
+    <button id="btnOpenTagModal" class="secondary">🏷️ Gestionar Etiquetas</button>
+    <label style="display: flex; align-items: center; gap: 6px;">
+      Color del Tablero:
+      <span class="color-picker-wrapper" title="Color del Tablero">
+        🎨
+        <input type="color" id="boardColorPicker">
+      </span>
+    </label>
+  </div>
+
+  <div id="board" class="board"></div>
+
+  <!-- Modal para Etiquetas -->
+  <div id="tagModal" class="modal">
+    <div class="modal-content">
+      <h3>Etiquetas del Tablero</h3>
+      <div id="tagsList"></div>
+      <h4>Crear Etiqueta</h4>
+      <input type="text" id="newTagName" placeholder="Nombre de etiqueta">
+      <input type="color" id="newTagColor" value="#89b4fa">
+      <button id="btnCreateTag">Agregar Etiqueta</button>
+      <button id="btnCloseTagModal" class="secondary">Cerrar</button>
+    </div>
+  </div>
+
+  <script nonce="${nonce}" src="${scriptUri}"></script>
+</body>
+</html>

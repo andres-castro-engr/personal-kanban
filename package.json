@@ -1,0 +1,53 @@
+{
+  "name": "personal-kanban",
+  "displayName": "Personal Kanban",
+  "description": "A kanban board using markdown files.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.138.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "kanbanViewer.option",
+        "displayName": "Tablero Kanban",
+        "selector": [
+          {
+            "filenamePattern": "*.kanban.md"
+          }
+        ],
+        "priority": "default"
+      }
+    ]
+  },
+  "scripts": {
+  "vscode:prepublish": "npm run package",
+  "compile": "tsc -p ./ && npm run copy-webview",
+  "watch": "tsc -watch -p ./",
+  "package": "tsc -p ./ && npm run copy-webview",
+  "copy-webview": "copyfiles -u 2 src/webview/*.html src/webview/*.css src/webview/*.js out/webview"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "24.x",
+    "@types/vscode": "^1.138.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0",
+    "copyfiles": "^2.4.1",
+    "eslint": "^10.5.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1"
+  },
+  "overrides": {
+    "diff": "^8.0.4",
+    "serialize-javascript": "^7.0.6"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3"
+  }
+}

@@ -6,6 +6,8 @@ let addingCardColIdx = null;
 let editingCardInfo = null; 
 let deletingColIdx = null;
 let deletingCardInfo = null;
+let assigningCardTagsInfo = null; 
+let selectedTagIds = new Set();
 
 window.addEventListener('message', (event) => {
   const message = event.data;
@@ -201,6 +203,12 @@ function resetTagForm() {
 }
 
 // --- DELEGACIÓN DE EVENTOS EN LÍNEA PARA CUMPLIR CON CSP ---
+// Filtrar etiquetas según lo que escribe el usuario
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'tagSearchInput') {
+    renderCardTagsSelectionList(e.target.value);
+  }
+});
 
 // Eventos 'change' para los Color Pickers e Inputs de fecha
 document.addEventListener('change', (e) => {
@@ -233,6 +241,13 @@ document.addEventListener('change', (e) => {
     currentBoard.columns[colIdx].cards[cardIdx].dueDate = target.value;
     save();
     render();
+  } else if (e.target && e.target.classList.contains('js-card-tag-checkbox')) {
+    const tagId = e.target.dataset.tagid;
+    if (e.target.checked) {
+      selectedTagIds.add(tagId);
+    } else {
+      selectedTagIds.delete(tagId);
+    }
   }
 });
 
@@ -240,6 +255,31 @@ document.addEventListener('change', (e) => {
 document.addEventListener('click', (e) => {
   const targetBtn = e.target.closest('button');
   if (!targetBtn) return;
+
+  // --- MODAL ASIGNAR ETIQUETAS A TARJETA ---
+  if (targetBtn.classList.contains('js-edit-tags')) {
+    const colIdx = parseInt(targetBtn.dataset.col, 10);
+    const cardIdx = parseInt(targetBtn.dataset.card, 10);
+    openCardTagsModal(colIdx, cardIdx);
+    return;
+  }
+
+  if (targetBtn.id === 'btnSaveCardTags') {
+    if (assigningCardTagsInfo) {
+      const { colIdx, cardIdx } = assigningCardTagsInfo;
+      // Asignar el nuevo array de IDs de etiquetas
+      currentBoard.columns[colIdx].cards[cardIdx].tags = Array.from(selectedTagIds);
+      save();
+      render();
+    }
+    closeCardTagsModal();
+    return;
+  }
+
+  if (targetBtn.id === 'btnCancelCardTags') {
+    closeCardTagsModal();
+    return;
+  }
 
   // --- MODAL ELIMINAR TARJETA ---
   if (targetBtn.classList.contains('js-delete-card')) {
@@ -539,4 +579,59 @@ function openAddCardModal(colIdx) {
 function closeAddCardModal() {
   document.getElementById('addCardModal').classList.remove('active');
   addingCardColIdx = null;
+}
+
+function openCardTagsModal(colIdx, cardIdx) {
+  assigningCardTagsInfo = { colIdx, cardIdx };
+  const card = currentBoard.columns[colIdx].cards[cardIdx];
+  
+  // Inicializar el Set con los IDs de las etiquetas asignadas actualmente
+  selectedTagIds = new Set(card.tags || []);
+
+  const searchInput = document.getElementById('tagSearchInput');
+  searchInput.value = '';
+
+  renderCardTagsSelectionList('');
+  
+  const modal = document.getElementById('cardTagsModal');
+  if (modal) {
+    modal.classList.add('active');
+    searchInput.focus();
+  }
+}
+
+function closeCardTagsModal() {
+  const modal = document.getElementById('cardTagsModal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+  assigningCardTagsInfo = null;
+  selectedTagIds.clear();
+}
+
+function renderCardTagsSelectionList(filterText) {
+  const container = document.getElementById('cardTagsListContainer');
+  const query = filterText.toLowerCase().trim();
+
+  const allTags = currentBoard.tags || [];
+  const filteredTags = allTags.filter((tag) => tag.name.toLowerCase().includes(query));
+
+  if (filteredTags.length === 0) {
+    container.innerHTML = `<div style="opacity: 0.6; text-align: center; padding: 8px;">No se encontraron etiquetas</div>`;
+    return;
+  }
+
+  container.innerHTML = filteredTags
+    .map((tag) => {
+      const isChecked = selectedTagIds.has(tag.id) ? 'checked' : '';
+      return `
+      <label style="display: flex; align-items: center; justify-content: space-between; padding: 6px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" class="js-card-tag-checkbox" data-tagid="${tag.id}" ${isChecked}>
+          <span class="tag-badge" style="background:${tag.color}">${escapeHtml(tag.name)}</span>
+        </div>
+      </label>
+    `;
+    })
+    .join('');
 }

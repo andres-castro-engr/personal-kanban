@@ -117,6 +117,26 @@
     </div>
   </div>
 
+  <!-- Modal para Seleccionar Etiquetas en una Tarjeta -->
+  <div id="cardTagsModal" class="modal">
+    <div class="modal-content">
+      <h3>Asignar Etiquetas</h3>
+      
+      <!-- Filtro de búsqueda -->
+      <input type="text" id="tagSearchInput" placeholder="🔍 Buscar etiqueta..." style="margin-bottom: 12px; width: 100%;">
+
+      <!-- Lista de etiquetas con checkboxes -->
+      <div id="cardTagsListContainer" style="max-height: 200px; overflow-y: auto; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 6px;">
+        <!-- Se renderizan dinámicamente -->
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px;">
+        <button id="btnCancelCardTags" class="secondary">Cancelar</button>
+        <button id="btnSaveCardTags">Guardar</button>
+      </div>
+    </div>
+  </div>
+
   <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>

@@ -1,9 +1,0 @@
-# Placeholder for README GIF
-
-This file is a placeholder. Replace it with an animated GIF named `readme.gif` to show in the README.
-
-Suggested path after replacing: `assets/readme.gif`
-
-Notes:
-- Keep filesize reasonable (e.g., < 2MB) for GitHub display.
-- After replacing, run `git add assets/readme.gif && git commit -m "feat: add README demo gif"` to include the real GIF.

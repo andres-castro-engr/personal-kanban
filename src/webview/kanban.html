@@ -69,6 +69,54 @@
     </div>
   </div>
 
+  <!-- Modal para Agregar Columna -->
+  <div id="addColModal" class="modal">
+    <div class="modal-content">
+      <h3>Nueva Columna</h3>
+      <input type="text" id="addColTitleInput" placeholder="Nombre de la columna">
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px;">
+        <button id="btnCancelAddCol" class="secondary">Cancelar</button>
+        <button id="btnSaveAddCol">Crear Columna</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Agregar Tarjeta -->
+  <div id="addCardModal" class="modal">
+    <div class="modal-content">
+      <h3>Nueva Tarjeta</h3>
+      <input type="text" id="addCardTitleInput" placeholder="Título de la tarjeta">
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px;">
+        <button id="btnCancelAddCard" class="secondary">Cancelar</button>
+        <button id="btnSaveAddCard">Crear Tarjeta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Confirmar Eliminación de Columna -->
+  <div id="deleteColModal" class="modal">
+    <div class="modal-content">
+      <h3>Eliminar Columna</h3>
+      <p>¿Estás seguro de que deseas eliminar esta columna y todas sus tarjetas?</p>
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+        <button id="btnCancelDeleteCol" class="secondary">Cancelar</button>
+        <button id="btnConfirmDeleteCol" style="background-color: #ef4444; color: white;">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Confirmar Eliminación de Tarjeta -->
+  <div id="deleteCardModal" class="modal">
+    <div class="modal-content">
+      <h3>Eliminar Tarjeta</h3>
+      <p>¿Estás seguro de que deseas eliminar esta tarjeta?</p>
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+        <button id="btnCancelDeleteCard" class="secondary">Cancelar</button>
+        <button id="btnConfirmDeleteCard" style="background-color: #ef4444; color: white;">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
   <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>

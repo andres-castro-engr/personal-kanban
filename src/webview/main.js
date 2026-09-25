@@ -2,6 +2,10 @@ const vscode = acquireVsCodeApi();
 let currentBoard = { tags: [], columns: [], boardColor: '#0f172a' };
 let editingColInfo = null;
 let editingTagIdx = null;
+let addingCardColIdx = null;
+let editingCardInfo = null; 
+let deletingColIdx = null;
+let deletingCardInfo = null;
 
 window.addEventListener('message', (event) => {
   const message = event.data;
@@ -10,6 +14,40 @@ window.addEventListener('message', (event) => {
     render();
   }
 });
+
+function openDeleteCardModal(colIdx, cardIdx) {
+  deletingCardInfo = { colIdx, cardIdx };
+  const modal = document.getElementById('deleteCardModal');
+  if (modal) {
+    modal.classList.add('active');
+  }
+}
+
+function closeDeleteCardModal() {
+  const modal = document.getElementById('deleteCardModal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+  deletingCardInfo = null;
+}
+
+function openDeleteColModal(colIdx) {
+  deletingColIdx = colIdx;
+  const modal = document.getElementById('deleteColModal');
+  if (modal) {
+    modal.classList.add('active');
+  } else {
+    console.error('El modal deleteColModal no se encuentra en el DOM');
+  }
+}
+
+function closeDeleteColModal() {
+  const modal = document.getElementById('deleteColModal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+  deletingColIdx = null;
+}
 
 function editColumnTitle(colIdx) {
   const col = currentBoard.columns[colIdx];
@@ -203,6 +241,52 @@ document.addEventListener('click', (e) => {
   const targetBtn = e.target.closest('button');
   if (!targetBtn) return;
 
+  // --- MODAL ELIMINAR TARJETA ---
+  if (targetBtn.classList.contains('js-delete-card')) {
+    const colIdx = parseInt(targetBtn.dataset.col, 10);
+    const cardIdx = parseInt(targetBtn.dataset.card, 10);
+    openDeleteCardModal(colIdx, cardIdx);
+    return;
+  }
+
+  if (targetBtn.id === 'btnConfirmDeleteCard') {
+    if (deletingCardInfo) {
+      const { colIdx, cardIdx } = deletingCardInfo;
+      currentBoard.columns[colIdx].cards.splice(cardIdx, 1);
+      save();
+      render();
+    }
+    closeDeleteCardModal();
+    return;
+  }
+
+  if (targetBtn.id === 'btnCancelDeleteCard') {
+    closeDeleteCardModal();
+    return;
+  }
+
+  // --- MODAL ELIMINAR COLUMNA ---
+  if (targetBtn.classList.contains('js-delete-col')) {
+    const colIdx = parseInt(targetBtn.dataset.col, 10);
+    openDeleteColModal(colIdx);
+    return;
+  }
+
+  if (targetBtn.id === 'btnConfirmDeleteCol') {
+    if (deletingColIdx !== null) {
+      currentBoard.columns.splice(deletingColIdx, 1);
+      save();
+      render();
+    }
+    closeDeleteColModal();
+    return;
+  }
+
+  if (targetBtn.id === 'btnCancelDeleteCol') {
+    closeDeleteColModal();
+    return;
+  }
+
   // Acciones del Modal de Edición de Columna
   if (targetBtn.id === 'btnSaveEditCol') {
     const newTitle = document.getElementById('editColTitleInput').value.trim();
@@ -248,11 +332,23 @@ document.addEventListener('click', (e) => {
 
   //  Acciones principales de la Toolbar
   if (targetBtn.id === 'btnAddColumn') {
-    const title = prompt('Nombre de la columna:');
-    if (!title) return;
-    currentBoard.columns.push({ id: 'col-' + Date.now(), title, cards: [] });
-    save();
-    render();
+    openAddColModal();
+    return;
+  }
+
+  if (targetBtn.id === 'btnSaveAddCol') {
+    const title = document.getElementById('addColTitleInput').value.trim();
+    if (title) {
+      currentBoard.columns.push({ id: 'col-' + Date.now(), title, cards: [] });
+      save();
+      render();
+    }
+    closeAddColModal();
+    return;
+  }
+
+  if (targetBtn.id === 'btnCancelAddCol') {
+    closeAddColModal();
     return;
   }
 
@@ -319,11 +415,24 @@ document.addEventListener('click', (e) => {
     }
   } else if (targetBtn.classList.contains('js-add-card')) {
     const colIdx = parseInt(targetBtn.dataset.col, 10);
-    const title = prompt('Título de la tarjeta:');
-    if (!title) return;
-    currentBoard.columns[colIdx].cards.push({ id: 'card-' + Date.now(), title, tags: [] });
-    save();
-    render();
+    openAddCardModal(colIdx);
+    return;
+  } else if (targetBtn.id === 'btnSaveAddCard') {
+    const title = document.getElementById('addCardTitleInput').value.trim();
+    if (title && addingCardColIdx !== null) {
+      currentBoard.columns[addingCardColIdx].cards.push({
+        id: 'card-' + Date.now(),
+        title,
+        tags: []
+      });
+      save();
+      render();
+    }
+    closeAddCardModal();
+    return;
+  } else if (targetBtn.id === 'btnCancelAddCard') {
+    closeAddCardModal();
+    return;
   } else if (targetBtn.classList.contains('js-delete-card')) {
     const colIdx = parseInt(targetBtn.dataset.col, 10);
     const cardIdx = parseInt(targetBtn.dataset.card, 10);
@@ -388,7 +497,7 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-let editingCardInfo = null; // Guardará { colIdx, cardIdx }
+
 
 function editCardTitle(colIdx, cardIdx) {
   const card = currentBoard.columns[colIdx].cards[cardIdx];
@@ -404,4 +513,30 @@ function editCardTitle(colIdx, cardIdx) {
 function closeEditCardModal() {
   document.getElementById('editCardModal').classList.remove('active');
   editingCardInfo = null;
+}
+
+// --- FUNCIONES PARA MODAL AGREGAR COLUMNA ---
+function openAddColModal() {
+  const input = document.getElementById('addColTitleInput');
+  input.value = '';
+  document.getElementById('addColModal').classList.add('active');
+  input.focus();
+}
+
+function closeAddColModal() {
+  document.getElementById('addColModal').classList.remove('active');
+}
+
+// --- FUNCIONES PARA MODAL AGREGAR TARJETA ---
+function openAddCardModal(colIdx) {
+  addingCardColIdx = colIdx;
+  const input = document.getElementById('addCardTitleInput');
+  input.value = '';
+  document.getElementById('addCardModal').classList.add('active');
+  input.focus();
+}
+
+function closeAddCardModal() {
+  document.getElementById('addCardModal').classList.remove('active');
+  addingCardColIdx = null;
 }

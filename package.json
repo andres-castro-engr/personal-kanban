@@ -1,6 +1,6 @@
 {
   "name": "personal-kanban-md",
-  "displayName": "Personal Kanban",
+  "displayName": "Personal Kanban MD",
   "publisher": "andres-castro-engr",
   "icon": "assets/icon.png",
   "description": "A kanban board using markdown files.",
@@ -22,7 +22,7 @@
     "customEditors": [
       {
         "viewType": "kanbanViewer.option",
-        "displayName": "Personal Kanban",
+        "displayName": "Personal Kanban MD",
         "selector": [
           {
             "filenamePattern": "*.kanban.md"

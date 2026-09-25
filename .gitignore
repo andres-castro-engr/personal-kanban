@@ -4,3 +4,6 @@ node_modules
 .vscode-test/
 *.vsix
 .DS_Store
+# Temporary helper scripts created during local packaging
+.tmp_check_icon.ps1
+.tmp_resize_icon.ps1

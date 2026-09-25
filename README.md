@@ -3,6 +3,10 @@
 ![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-blue?logo=visualstudiocode)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+<p align="center">
+  <img src="assets/demo.gif" alt="Personal Kanban demo" width="640" />
+</p>
+
 Transform any `.kanban.md` file into an interactive, visual, and fully customizable Kanban board directly inside Visual Studio Code. All your data stays in standard Markdown format, making it completely compatible with version control systems like Git.
 
 ---

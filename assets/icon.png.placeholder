@@ -1,0 +1,9 @@
+# Placeholder for marketplace icon
+
+This file is a placeholder. Replace it with a 128x128 PNG named `icon.png` for the VS Code Marketplace.
+
+Suggested path after replacing: `assets/icon.png`
+
+Notes:
+- PNG should be 128x128 (recommended) and under VS Code Marketplace size limits.
+- After replacing, run `git add assets/icon.png && git commit -m "feat: add marketplace icon"` to include the real icon.

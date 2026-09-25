@@ -17,7 +17,7 @@ export function parseMarkdownToBoard(text: string): KanbanBoard {
   for (const line of lines) {
     const trimmed = line.trim();
 
-    // Extraer título y color de la columna
+    // Extract column title and color
     if (trimmed.startsWith('## ')) {
       const headerText = trimmed.replace(/^##\s+/, '');
       

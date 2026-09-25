@@ -18,7 +18,7 @@ export function parseBoardToMarkdown(board: KanbanBoard): string {
   let content = '';
 
   for (const column of board.columns) {
-    // Persistir el color de la columna en la línea del título ##
+    // Persist the column color in the title line ##
     const columnColorMeta = column.color ? ` %% color: ${column.color} %%` : '';
     content += `\n## ${column.title}${columnColorMeta}\n`;
 

@@ -9,8 +9,9 @@ export interface Card {
   title: string;
   description?: string;
   color?: string;
-  tags: string[]; // IDs de las etiquetas
-  dueDate?: string; // Formato YYYY-MM-DD
+  tags: string[]; // Tag IDs
+  dueDate?: string; // Format YYYY-MM-DD
+
 }
 
 export interface Column {
